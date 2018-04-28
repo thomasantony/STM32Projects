@@ -14,13 +14,13 @@ SYSTEM_MODE(MANUAL);
 uint32_t channel_idx = 0;
 
 const int NUM_PULSES = 10;
-volatile uint16_t pulse_list[NUM_PULSES];
+volatile uint16_t pulse_list[NUM_PULSES] = {0,};
 volatile int last_pulse_idx = 0;
 
-void Wiring_TIM3_Interrupt_Handler_override()
+void TIM3_Interrupt_Handler_override()
 {
-  uint16_t pulse_stop  = (TIM3->CCR1) >> 16;
-  uint16_t pulse_start = (TIM3->CCR1) & 0xFFFF;
+  uint16_t pulse_stop  = (&TIM3->CCR1)[0];
+  uint16_t pulse_start = (&TIM3->CCR1)[1];
   // We assume that the pulse length is within one timer period.
   uint16_t pulse_len = pulse_stop - pulse_start;
   if(last_pulse_idx == 1)
@@ -43,12 +43,19 @@ void InitializeCapture()
   timerInitStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM3, &timerInitStructure);
 
+  // Channel 1 init
   TIM_ICInitTypeDef inputCaptureInit;
   inputCaptureInit.TIM_ICPolarity = TIM_ICPolarity_Rising;
   inputCaptureInit.TIM_Channel = TIM_Channel_1;
   inputCaptureInit.TIM_ICSelection = TIM_ICSelection_DirectTI;
   inputCaptureInit.TIM_ICPrescaler = TIM_ICPSC_DIV1;
   inputCaptureInit.TIM_ICFilter = 0x0;
+  TIM_ICInit(TIM3, &inputCaptureInit);
+
+  // Paired channel init
+  inputCaptureInit.TIM_Channel = TIM_Channel_2;
+  inputCaptureInit.TIM_ICPolarity = TIM_ICPolarity_Falling;
+  inputCaptureInit.TIM_ICSelection = TIM_ICSelection_IndirectTI;
   TIM_ICInit(TIM3, &inputCaptureInit);
 
   TIM_ITConfig(TIM3, TIM_IT_CC1, ENABLE); // Enable interrupt for capture
@@ -60,7 +67,7 @@ void InitializeCapture()
 
 void EnableTimerInterrupt()
 {
-    if (!attachSystemInterrupt(SysInterrupt_TIM3_Compare1, Wiring_TIM3_Interrupt_Handler_override));	//error
+    if (!attachSystemInterrupt(SysInterrupt_TIM3_Compare1, TIM3_Interrupt_Handler_override));	//error
     NVIC_InitTypeDef nvicStructure;
     nvicStructure.NVIC_IRQChannel = TIM3_IRQn;
     nvicStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -110,7 +117,7 @@ void InitializePWMSignal()
 
   TIM_OCInitTypeDef outputChannelInit = {0,};
   outputChannelInit.TIM_OCMode = TIM_OCMode_PWM1;
-  outputChannelInit.TIM_Pulse = 300;
+  outputChannelInit.TIM_Pulse = 301;
   outputChannelInit.TIM_OutputState = TIM_OutputState_Enable;
   outputChannelInit.TIM_OCPolarity = TIM_OCPolarity_High;
 
