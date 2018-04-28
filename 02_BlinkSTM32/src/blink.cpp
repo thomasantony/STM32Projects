@@ -41,7 +41,7 @@ void InitializeTimer()
   timerInitStructure.TIM_Prescaler = SIT_PRESCALERm;
   timerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
   timerInitStructure.TIM_Period = 2000;  // 2000 * 0.5 ms = 1 sec
-  timerInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  timerInitStructure.TIM_ClockDivision = TIM_CKD_DIV4;
   timerInitStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM4, &timerInitStructure);
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -73,7 +73,6 @@ void loop() {
   if (Particle.connected() == false) {
     Particle.connect();
   }
-  // Particle.process();
-  // GPIO_ToggleBits(GPIOB, GPIO_Pin_7);
+  Particle.process();
   delay(1000);
 }
