@@ -36,7 +36,7 @@ void InitializeCapture()
 {
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
   TIM_TimeBaseInitTypeDef timerInitStructure;
-  timerInitStructure.TIM_Prescaler = SIT_PRESCALERm;
+  timerInitStructure.TIM_Prescaler = SIT_PRESCALERu;
   timerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
   timerInitStructure.TIM_Period = 0xFFFF;
   timerInitStructure.TIM_ClockDivision = TIM_CKD_DIV4;
@@ -107,9 +107,9 @@ void InitializePWMSignal()
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
   TIM_TimeBaseInitTypeDef timerInitStructure;
-  timerInitStructure.TIM_Prescaler = SIT_PRESCALERm;
+  timerInitStructure.TIM_Prescaler = SIT_PRESCALERu;
   timerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  timerInitStructure.TIM_Period = 500;
+  timerInitStructure.TIM_Period = 5001;
   timerInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   timerInitStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM4, &timerInitStructure);
@@ -117,7 +117,7 @@ void InitializePWMSignal()
 
   TIM_OCInitTypeDef outputChannelInit = {0,};
   outputChannelInit.TIM_OCMode = TIM_OCMode_PWM1;
-  outputChannelInit.TIM_Pulse = 301;
+  outputChannelInit.TIM_Pulse = 4940;
   outputChannelInit.TIM_OutputState = TIM_OutputState_Enable;
   outputChannelInit.TIM_OCPolarity = TIM_OCPolarity_High;
 
