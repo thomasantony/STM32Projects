@@ -4,23 +4,25 @@
 #include <stm32f2xx_tim.h>
 #include <misc.h>
 
+#define SYSCORECLOCK	60000000UL   // photon - 60Mhz timer clock
+const uint16_t SIT_PRESCALERu = (uint16_t)(SYSCORECLOCK / 1000000UL) - 1;	//To get TIM counter clock = 1MHz
+const uint16_t SIT_PRESCALERm = (uint16_t)(SYSCORECLOCK / 2000UL) - 1;	//To get TIM counter clock = 2KHz
 
 SYSTEM_MODE(MANUAL);
 
-
-extern "C" void TIM4_IRQHandler()
+void Wiring_TIM4_Interrupt_Handler_override()
 {
-    if (TIM_GetITStatus(TIM4, TIM_IT_Update))
-    {
-        TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-        GPIO_ToggleBits(GPIOB, GPIO_Pin_7);
-    }
+	if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET)
+	{
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_7);
+	}
 }
-// Board LED is on Port PA13 = D7
-// Board LED is on Port PB7 = D0
+
 
 void EnableTimerInterrupt()
 {
+    if (!attachSystemInterrupt(SysInterrupt_TIM4_Update, Wiring_TIM4_Interrupt_Handler_override)) ;	//error
     NVIC_InitTypeDef nvicStructure;
     nvicStructure.NVIC_IRQChannel = TIM4_IRQn;
     nvicStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -34,18 +36,11 @@ void InitializeTimer()
   // Ref: https://visualgdb.com/tutorials/arm/stm32/timers/
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
-  // TIM4 initialization overflow every 500ms
-  // TIM4 by default has clock of 84MHz
-  // Here, we must set value of prescaler and period,
-  // so update event is 0.5Hz or 500ms
-  // Update Event (Hz) = timer_clock / ((TIM_Prescaler + 1) *
-  // (TIM_Period + 1))
-  // Update Event (Hz) = 84MHz / ((4199 + 1) * (9999 + 1)) = 2 Hz
 
   TIM_TimeBaseInitTypeDef timerInitStructure;
-  timerInitStructure.TIM_Prescaler = 4199; // 1 count = 1 ms
+  timerInitStructure.TIM_Prescaler = SIT_PRESCALERm;
   timerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  timerInitStructure.TIM_Period = 500;
+  timerInitStructure.TIM_Period = 2000;  // 2000 * 0.5 ms = 1 sec
   timerInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   timerInitStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM4, &timerInitStructure);
@@ -70,8 +65,8 @@ void InitializeLED()
 
 void setup() {
   InitializeLED();
-  InitializeTimer();
   EnableTimerInterrupt();
+  InitializeTimer();
 }
 
 void loop() {
