@@ -1,4 +1,4 @@
-macro(SetupPhotonFirmware PROJECT SRCDIR)
+macro(SetupPhotonFirmware PROJECT)
     include(ExternalProject)
     find_package(Git REQUIRED)
 
@@ -6,7 +6,7 @@ macro(SetupPhotonFirmware PROJECT SRCDIR)
     if(NOT FIRMWARE_DIR)
       set(FIRMWARE_DIR "${CMAKE_SOURCE_DIR}/libs/particle-firmware")
     endif ()
-    set(APPDIR ${SRCDIR})
+    set(APPDIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(TARGET_DIR "${CMAKE_BINARY_DIR}")
     set(TARGET_FILE "${PROJECT}-${PARTICLE_PLATFORM}")
 
