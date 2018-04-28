@@ -3,7 +3,7 @@ macro(SetupPhotonFirmware)
     find_package(Git REQUIRED)
 
     set(PARTICLE_PLATFORM "photon" CACHE STRING "Particle platform to compile for")
-    set(FIRMWARE_DIR "${CMAKE_SOURCE_DIR}/libs/particle-firmware")
+    set(FIRMWARE_DIR "${CMAKE_SOURCE_DIR}/../libs/particle-firmware")
     set(APPDIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(TARGET_DIR "${CMAKE_BINARY_DIR}")
     set(TARGET_FILE "${PROJECT}-${PARTICLE_PLATFORM}")
